@@ -30,6 +30,18 @@ const removeUnwantedElements = (_cheerio) => {
 	elementsToRemove.forEach((element) => _cheerio(element).remove());
 };
 
+function cleanText(text) {
+	return text
+		// Replace multiple newlines with double newlines
+		.replace(/\n\s*\n/g, '\n\n')
+		// Replace single newlines and tabs with spaces
+		.replace(/[\t\r ]*\n[\t\r ]*/g, ' ')
+		// Replace multiple spaces with single space
+		.replace(/\s+/g, ' ')
+		// Trim leading and trailing whitespace
+		.trim();
+}
+
 const fetchAndCleanContent = async (url) => {
 	const response = await fetch(url);
 	const html = await response.text();
@@ -38,12 +50,12 @@ const fetchAndCleanContent = async (url) => {
 	const title = $('title').text();
 
 	removeUnwantedElements($);
-	const content = $.text().replace(/(\r\n|\r|\n|\n \n){2,}/g, '$1\n') || '';
+	const content = cleanText($.text()) || '';
 
 	return {
 		title,
 		content,
-		html: $.html() || '',
+		html: cleanText($.html()) || '',
 		url,
 	};
 };
